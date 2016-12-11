@@ -1,0 +1,28 @@
+{
+  "name": "susi_tweetbot",
+  "version": "1.0.0",
+  "description": "Twitter Bot",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hoangvanthien/susi_tweetbot.git"
+  },
+  "keywords": [
+    "Twitter",
+    "Artificial",
+    "Intelligence"
+  ],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/hoangvanthien/susi_tweetbot/issues"
+  },
+  "homepage": "https://github.com/hoangvanthien/susi_tweetbot#readme",
+  "dependencies": {
+    "twit": "^2.2.5"
+  }
+}
