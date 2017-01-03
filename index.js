@@ -16,6 +16,8 @@ var T = new Twit({
 	access_token_secret: process.env.TWITTER_ATS
 });
 
+var TWITTER_SEARCH_PHRASE = '#FOSSASIA OR #OpenSource OR #SusiAI';
+
 function TwitterBot() {
 	setInterval(function() { http.get(heroku_deploy_url); }, 1800000);
 	var stream = T.stream('user');
@@ -108,6 +110,41 @@ function TwitterBot() {
 				console.log('Message was sent!');
 			}
 		}
+	}
+
+	function retweet() {
+
+		var query = {
+			q: TWITTER_SEARCH_PHRASE,
+			result_type: "recent"
+		}
+
+		T.get('search/tweets', query, gotLatestTweet);
+
+		function gotLatestTweet (err, data, response) {
+			if (err) {
+				console.log('Something went wrong!');
+				console.log(err);
+			}
+			else {
+				var id = {
+					id : data.statuses[0].id_str
+				}
+
+				T.post('statuses/retweet/:id', id, retweeted);
+				
+				function retweeted(err, response) {
+					if (err) {
+						console.log('Something went wrong!');
+						console.log(err);
+					}
+					else {
+						console.log('Susi retweeted : ' + id.id);
+					}
+				}
+			}
+		}
+		setInterval(retweet, 30000);
 	}
 }
 app.listen(app.get('port'), function() {
