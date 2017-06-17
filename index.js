@@ -7,7 +7,7 @@ var http = require('http');
 
 var app = express();
 app.set('port', (process.env.PORT || 5000));
-var heroku_deploy_url = (process.env.HEROKU_URL)||("https://susi-tweetbot.herokuapp.com");
+var heroku_deploy_url = (process.env.HEROKU_URL)||("https://susichatbot.herokuapp.com");
 
 var T = new Twit({
 	consumer_key: process.env.TWITTER_CK,
@@ -60,7 +60,7 @@ function TwitterBot() {
 		}
 		console.log('You receive a message!');
 		console.log(directMsg);
-		var queryUrl = 'http://api.asksusi.com/susi/chat.json?q=' + encodeURI(directMsg.direct_message.text);
+		var queryUrl = 'http://api.susi.ai/susi/chat.json?q=' + encodeURI(directMsg.direct_message.text);
 		var message = '';
 		request({
 			url: queryUrl,
