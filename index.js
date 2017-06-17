@@ -25,7 +25,7 @@ function TwitterBot() {
 		var replyto = eventMsg.in_reply_to_screen_name;
 		var text = eventMsg.text.substring(15);
 		var from = eventMsg.user.screen_name;
-		if (replyto === 'susi_tweetbot') {
+		if (replyto === 'SusiAI1') {
 			var queryUrl = 'http://api.asksusi.com/susi/chat.json?q=' + encodeURI(text);
 			var message = '';
 			request({
