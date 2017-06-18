@@ -19,6 +19,7 @@ var T = new Twit({
 function TwitterBot() {
 	setInterval(function() { http.get(heroku_deploy_url); }, 1800000);
 	var stream = T.stream('user');
+	
 	stream.on('tweet', tweetEvent);
 	function tweetEvent(eventMsg) {
 		console.log(eventMsg);
@@ -26,7 +27,6 @@ function TwitterBot() {
 		var text = eventMsg.text.substring(9);
 		var from = eventMsg.user.screen_name;
 		if (replyto === 'SusiAI1') {
-			console.log('--------------------------------I am query message '+encodeURI(text)+' ?');
 			var queryUrl = 'http://api.asksusi.com/susi/chat.json?q=' + encodeURI(text);
 			var message = '';
 			request({
@@ -51,11 +51,24 @@ function TwitterBot() {
 		var name = eventMsg.source.name;
 		var screenName = eventMsg.source.screen_name;
 		var x = Math.floor(Math.random()*1000);
-		tweetIt('@' + screenName + ' Thank you for following me! Your lucky number is ' + x);
+		var user_id1 = eventMsg.source.id_str;
+		T.post('friendships/create', {user_id : user_id1},  function(err, tweets, response){
+			if (err) {
+				console.log('friendships/create ' + err);
+				tweetIt('@' + screenName + ' Thank you for following me! Your lucky number is ' + x);
+				console.log("----Couldn't follow back!");
+				console.log(response);
+			} 
+			else {    
+				tweetIt('@' + screenName + ' Thank you for following me! Your lucky number is ' + x + '.I followed you back, you can also direct message me now! ;)');
+				console.log("----followed back!");
+			} 
+		});	
 	}
 
 	stream.on('direct_message', reply);
 	function reply(directMsg) {
+		console.log('You receive a message!');
 		if (directMsg.direct_message.sender_screen_name === 'susi_tweetbot') {
 			return;
 		}
