@@ -23,9 +23,10 @@ function TwitterBot() {
 	function tweetEvent(eventMsg) {
 		console.log(eventMsg);
 		var replyto = eventMsg.in_reply_to_screen_name;
-		var text = eventMsg.text.substring(15);
+		var text = eventMsg.text.substring(9);
 		var from = eventMsg.user.screen_name;
 		if (replyto === 'SusiAI1') {
+			console.log('--------------------------------I am query message '+encodeURI(text)+' ?');
 			var queryUrl = 'http://api.asksusi.com/susi/chat.json?q=' + encodeURI(text);
 			var message = '';
 			request({
@@ -33,9 +34,9 @@ function TwitterBot() {
 				json: true
 			}, function (err, response, data) {
 				if (!err && response.statusCode === 200) {
-					message = data.answers[0].actions[0].expression;
+					message = data.answers[0].actions[0].expression + ' - ' + new Date().toISOString().slice(new Date().toISOString().indexOf('T')+1).replace(/\..+/, '');
 				} else {
-					message = 'Oops, Looks like Susi is taking a break, She will be back soon';
+					message = 'Oops, Looks like Susi is taking a break, She will be back soon' + ' - ' + new Date().toISOString().slice(new Date().toISOString().indexOf('T')+1).replace(/\..+/, '');
 					console.log(err);
 				}
 				console.log(message);
