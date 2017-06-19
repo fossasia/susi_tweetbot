@@ -7,7 +7,7 @@ var http = require('http');
 
 var app = express();
 app.set('port', (process.env.PORT || 5000));
-var heroku_deploy_url = (process.env.HEROKU_URL)||("https://susichatbot.herokuapp.com");
+var heroku_deploy_url = (process.env.HEROKU_URL)||("https://susitweetbot.herokuapp.com");
 
 var T = new Twit({
 	consumer_key: process.env.TWITTER_CK,
