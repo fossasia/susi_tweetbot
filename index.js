@@ -7,7 +7,7 @@ var http = require('http');
 
 var app = express();
 app.set('port', (process.env.PORT || 5000));
-var heroku_deploy_url = (process.env.HEROKU_URL)||("https://susi-tweetbot.herokuapp.com");
+var heroku_deploy_url = (process.env.HEROKU_URL)||("https://susitweetbot.herokuapp.com");
 
 var T = new Twit({
 	consumer_key: process.env.TWITTER_CK,
@@ -19,13 +19,14 @@ var T = new Twit({
 function TwitterBot() {
 	setInterval(function() { http.get(heroku_deploy_url); }, 1800000);
 	var stream = T.stream('user');
+	
 	stream.on('tweet', tweetEvent);
 	function tweetEvent(eventMsg) {
 		console.log(eventMsg);
 		var replyto = eventMsg.in_reply_to_screen_name;
-		var text = eventMsg.text.substring(15);
+		var text = eventMsg.text.substring(9);
 		var from = eventMsg.user.screen_name;
-		if (replyto === 'susi_tweetbot') {
+		if (replyto === 'SusiAI1') {
 			var queryUrl = 'http://api.asksusi.com/susi/chat.json?q=' + encodeURI(text);
 			var message = '';
 			request({
@@ -33,9 +34,9 @@ function TwitterBot() {
 				json: true
 			}, function (err, response, data) {
 				if (!err && response.statusCode === 200) {
-					message = data.answers[0].actions[0].expression;
+					message = data.answers[0].actions[0].expression + ' - ' + new Date().toISOString().slice(new Date().toISOString().indexOf('T')+1).replace(/\..+/, '');
 				} else {
-					message = 'Oops, Looks like Susi is taking a break, She will be back soon';
+					message = 'Oops, Looks like Susi is taking a break, She will be back soon' + ' - ' + new Date().toISOString().slice(new Date().toISOString().indexOf('T')+1).replace(/\..+/, '');
 					console.log(err);
 				}
 				console.log(message);
@@ -50,17 +51,30 @@ function TwitterBot() {
 		var name = eventMsg.source.name;
 		var screenName = eventMsg.source.screen_name;
 		var x = Math.floor(Math.random()*1000);
-		tweetIt('@' + screenName + ' Thank you for following me! Your lucky number is ' + x);
+		var user_id1 = eventMsg.source.id_str;
+		T.post('friendships/create', {user_id : user_id1},  function(err, tweets, response){
+			if (err) {
+				console.log('friendships/create ' + err);
+				tweetIt('@' + screenName + ' Thank you for following me! Your lucky number is ' + x);
+				console.log("----Couldn't follow back!");
+				console.log(response);
+			} 
+			else {    
+				tweetIt('@' + screenName + ' Thank you for following me! Your lucky number is ' + x + '.I followed you back, you can also direct message me now! ;)');
+				console.log("----followed back!");
+			} 
+		});	
 	}
 
 	stream.on('direct_message', reply);
 	function reply(directMsg) {
+		console.log('You receive a message!');
 		if (directMsg.direct_message.sender_screen_name === 'susi_tweetbot') {
 			return;
 		}
 		console.log('You receive a message!');
 		console.log(directMsg);
-		var queryUrl = 'http://api.asksusi.com/susi/chat.json?q=' + encodeURI(directMsg.direct_message.text);
+		var queryUrl = 'http://api.susi.ai/susi/chat.json?q=' + encodeURI(directMsg.direct_message.text);
 		var message = '';
 		request({
 			url: queryUrl,
