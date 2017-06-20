@@ -83,17 +83,27 @@ function TwitterBot() {
 		}, function (err, response, data) {
 			if (!err && response.statusCode === 200) {
 				if(data.answers[0].actions[1]){
-
+					if(data.answers[0].actions[1].type === 'rss'){
+						message += 'I found this on the web-:\n\n'
+						for(var i=0;i<((data.answers[0].metadata.count)>40?40:data.answers[0].metadata.count);i++){
+								message += ('Title : ');
+								message += data.answers[0].data[i].title+', ';
+								message += ('Link : ');
+								message += data.answers[0].data[i].link+', ';
+							message += '\n';
+						}
+					}
 				}
 				else{
 					if(data.answers[0].actions[0].type === 'table'){
 						var colNames = data.answers[0].actions[0].columns;
-						for(var i=0;i<data.answers[0].metadata.count;i++){
+						message += 'Due to message limit, only some universities are shown-:\n\n';
+						for(var i=0;i<((data.answers[0].metadata.count)>40?40:data.answers[0].metadata.count);i++){
 							for(var cN in colNames){
 								message += (colNames[cN]+' : ');
 								message += data.answers[0].data[i][cN]+', ';
 							}
-							message += '\n';
+							message += '\n\n';
 						}
 					}
 					else
