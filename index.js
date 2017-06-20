@@ -26,6 +26,7 @@ function TwitterBot() {
 		var replyto = eventMsg.in_reply_to_screen_name;
 		var text = eventMsg.text.substring(9);
 		var from = eventMsg.user.screen_name;
+		var date = ' - ' + new Date().toISOString().slice(new Date().toISOString().indexOf('T')+1).replace(/\..+/, '');
 		if (replyto === 'SusiAI1') {
 			var queryUrl = 'http://api.asksusi.com/susi/chat.json?q=' + encodeURI(text);
 			var message = '';
@@ -34,9 +35,9 @@ function TwitterBot() {
 				json: true
 			}, function (err, response, data) {
 				if (!err && response.statusCode === 200) {
-					message = data.answers[0].actions[0].expression + ' - ' + new Date().toISOString().slice(new Date().toISOString().indexOf('T')+1).replace(/\..+/, '');
+					message = data.answers[0].actions[0].expression + date;
 				} else {
-					message = 'Oops, Looks like Susi is taking a break, She will be back soon' + ' - ' + new Date().toISOString().slice(new Date().toISOString().indexOf('T')+1).replace(/\..+/, '');
+					message = 'Oops, Looks like Susi is taking a break, She will be back soon' + date;
 					console.log(err);
 				}
 				console.log(message);
@@ -69,7 +70,7 @@ function TwitterBot() {
 	stream.on('direct_message', reply);
 	function reply(directMsg) {
 		console.log('You receive a message!');
-		if (directMsg.direct_message.sender_screen_name === 'susi_tweetbot') {
+		if (directMsg.direct_message.sender_screen_name === 'SusiAI1') {
 			return;
 		}
 		console.log('You receive a message!');
@@ -81,7 +82,26 @@ function TwitterBot() {
 			json: true
 		}, function (err, response, data) {
 			if (!err && response.statusCode === 200) {
-				message = data.answers[0].actions[0].expression;
+				if(data.answers[0].actions[1]){
+
+				}
+				else{
+					if(data.answers[0].actions[0].type === 'table'){
+						var colNames = data.answers[0].actions[0].columns;
+						for(var i=0;i<data.answers[0].metadata.count;i++){
+							for(var cN in colNames){
+								message += (colNames[cN]+' : ');
+								message += data.answers[0].data[i][cN]+', ';
+							}
+							message += '\n';
+						}
+					}
+					else
+					{
+						message = data.answers[0].actions[0].expression;
+					}
+				}
+
 			} else {
 				message = 'Oops, Looks like Susi is taking a break, She will be back soon';
 				console.log(err);
