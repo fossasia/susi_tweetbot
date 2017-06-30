@@ -69,7 +69,7 @@ function TwitterBot() {
 					}
 				} 
 				else {
-					message = 'Oops, Looks like Susi is taking a break, She will be back soon' + date;
+					message = 'Oops, Looks like Susi is taking a break, She will be back soon';
 					console.log(err);
 				}
 				console.log(message);
