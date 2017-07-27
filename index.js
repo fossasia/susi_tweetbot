@@ -20,6 +20,7 @@ function TwitterBot() {
 	setInterval(function() { http.get(heroku_deploy_url); }, 1800000);
 	var stream = T.stream('user');
 	
+	//welcomeMessage();
 	stream.on('tweet', tweetEvent);
 	function tweetEvent(eventMsg) {
 		console.log(eventMsg);
@@ -114,53 +115,65 @@ function TwitterBot() {
 		}
 		console.log('You receive a message!');
 		console.log(directMsg);
-		var queryUrl = 'http://api.susi.ai/susi/chat.json?q=' + encodeURI(directMsg.direct_message.text);
-		var message = '';
-		request({
-			url: queryUrl,
-			json: true
-		}, function (err, response, data) {
-			if (!err && response.statusCode === 200) {
-				if(data.answers[0].actions[1]){
-					if(data.answers[0].actions[1].type === 'rss'){
-						message += 'I found this on the web-:\n\n'
-						for(var i=0;i<((data.answers[0].metadata.count)>50?50:data.answers[0].metadata.count);i++){
-								message += ('Title : ');
-								message += data.answers[0].data[i].title+', ';
-								message += ('Link : ');
-								message += data.answers[0].data[i].link+', ';
-							message += '\n\n';
-						}
-					}
-				}
-				else{
-					if(data.answers[0].actions[0].type === 'table'){
-						var colNames = data.answers[0].actions[0].columns;
-						if((data.answers[0].metadata.count)>50)
-							message += 'Due to message limit, only some universities are shown-:\n\n';
-						else
-							message += 'Universities are shown below-:\n\n';
-						for(var i=0;i<((data.answers[0].metadata.count)>50?50:data.answers[0].metadata.count);i++){
-							for(var cN in colNames){
-								message += (colNames[cN]+' : ');
-								message += data.answers[0].data[i][cN]+', ';
+
+		if(directMsg.direct_message.text === "get started"){
+			makeEvent(directMsg.direct_message.sender.id_str);
+		}
+		else if(directMsg.direct_message.text === "Start Chatting"){
+			sendMessage(directMsg.direct_message.sender_screen_name, "You can ask me anything. Your questions are my food and I am damn hungry!");
+		}
+		else if(directMsg.direct_message.text === "View Repository"){
+			sendMessage(directMsg.direct_message.sender_screen_name, "Visit https://www.github.com/fossasia/susi_server");
+		}
+		else{
+			var queryUrl = 'http://api.susi.ai/susi/chat.json?q=' + encodeURI(directMsg.direct_message.text);
+			var message = '';
+			request({
+				url: queryUrl,
+				json: true
+			}, function (err, response, data) {
+				if (!err && response.statusCode === 200) {
+					if(data.answers[0].actions[1]){
+						if(data.answers[0].actions[1].type === 'rss'){
+							message += 'I found this on the web-:\n\n'
+							for(var i=0;i<((data.answers[0].metadata.count)>50?50:data.answers[0].metadata.count);i++){
+									message += ('Title : ');
+									message += data.answers[0].data[i].title+', ';
+									message += ('Link : ');
+									message += data.answers[0].data[i].link+', ';
+								message += '\n\n';
 							}
-							message += '\n\n';
 						}
 					}
-					else
-					{
-						message = data.answers[0].actions[0].expression;
+					else{
+						if(data.answers[0].actions[0].type === 'table'){
+							var colNames = data.answers[0].actions[0].columns;
+							if((data.answers[0].metadata.count)>50)
+								message += 'Due to message limit, only some universities are shown-:\n\n';
+							else
+								message += 'Universities are shown below-:\n\n';
+							for(var i=0;i<((data.answers[0].metadata.count)>50?50:data.answers[0].metadata.count);i++){
+								for(var cN in colNames){
+									message += (colNames[cN]+' : ');
+									message += data.answers[0].data[i][cN]+', ';
+								}
+								message += '\n\n';
+							}
+						}
+						else
+						{
+							message = data.answers[0].actions[0].expression;
+						}
 					}
+				} 
+				else {
+					message = 'Oops, Looks like Susi is taking a break, She will be back soon';
+					console.log(err);
 				}
-			} 
-			else {
-				message = 'Oops, Looks like Susi is taking a break, She will be back soon';
-				console.log(err);
-			}
-			sendMessage(directMsg.direct_message.sender_screen_name, message);
-			console.log(message);
-		});
+				sendMessage(directMsg.direct_message.sender_screen_name, message);
+				console.log(message);
+			});
+		}
 	}
 
 	function tweetIt(txt) {
@@ -195,6 +208,67 @@ function TwitterBot() {
 			}
 		}
 	}
+
+	function makeEvent(sender) {
+		var msg = {
+					  "event": {
+					    "type": "message_create",
+					    "message_create": {
+					      "target": {
+					        "recipient_id": sender
+					      },
+					      "message_data": {
+					        "text": "Welcome! I am built by open source community Fossasia. Also, I am evolving continuously.",
+					        "quick_reply": {
+					          "type": "options",
+					          "options": [
+					            {
+					              "label": "View Repository",
+					              "metadata": "external_id_1"
+					            },
+					            {
+					              "label": "Start Chatting",
+					              "metadata": "external_id_2"
+					            }
+					          ]
+					        }
+					      }
+					    }
+					  }
+					};
+
+		T.post('direct_messages/events/new', msg, sent);
+
+		function sent(err, data, response) {
+			if (err) {
+				console.log('Something went wrong!');
+				console.log(err);
+			} else {
+				console.log('Events were sent!');
+			}
+		}
+	}
+
+	// function welcomeMessage(sender, txt) {
+	// 	var msg = {
+	// 				  "welcome_message" : {
+	// 				    "message_data": {
+	// 				      "text": "Welcome!"
+	// 				    }
+	// 				  }
+	// 				};
+	// 	T.post('direct_messages/welcome_messages/new', msg, sent);
+
+	// 	function sent(err, data, response) {
+	// 		if (err) {
+	// 			console.log('hi...Something went wrong!');
+	// 			console.log(err);
+	// 		} else {
+	// 			console.log('hi...Message was sent!');
+	// 			console.log(response);
+	// 		}
+	// 	}
+	// }
 }
 app.listen(app.get('port'), function() {
 	console.log('Running on port ', app.get('port'));
