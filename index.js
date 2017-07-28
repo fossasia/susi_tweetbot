@@ -110,20 +110,24 @@ function TwitterBot() {
 	stream.on('direct_message', reply);
 	function reply(directMsg) {
 		console.log('You receive a message!');
-		if (directMsg.direct_message.sender_screen_name === 'SusiAI1') {
+
+		var senderName = directMsg.direct_message.sender_screen_name;
+		var senderId = directMsg.direct_message.sender.id_str;
+
+		if (senderName === 'SusiAI1') {
 			return;
 		}
 		console.log('You receive a message!');
 		console.log(directMsg);
 
 		if(directMsg.direct_message.text === "get started"){
-			makeEvent(directMsg.direct_message.sender.id_str);
+			makeEvent(senderId);
 		}
 		else if(directMsg.direct_message.text === "Start Chatting"){
-			sendMessage(directMsg.direct_message.sender_screen_name, "You can ask me anything. Your questions are my food and I am damn hungry!");
+			sendMessage(senderName, "You can ask me anything. Your questions are my food and I am damn hungry!");
 		}
 		else if(directMsg.direct_message.text === "View Repository"){
-			sendMessage(directMsg.direct_message.sender_screen_name, "Visit https://www.github.com/fossasia/susi_server");
+			sendMessage(senderName, "Visit https://www.github.com/fossasia/susi_server");
 		}
 		else{
 			var queryUrl = 'http://api.susi.ai/susi/chat.json?q=' + encodeURI(directMsg.direct_message.text);
@@ -170,7 +174,7 @@ function TwitterBot() {
 					message = 'Oops, Looks like Susi is taking a break, She will be back soon';
 					console.log(err);
 				}
-				sendMessage(directMsg.direct_message.sender_screen_name, message);
+				sendMessage(senderName, message);
 				console.log(message);
 			});
 		}
@@ -244,31 +248,10 @@ function TwitterBot() {
 				console.log('Something went wrong!');
 				console.log(err);
 			} else {
-				console.log('Events were sent!');
+				console.log('Event was sent!');
 			}
 		}
 	}
-
-	// function welcomeMessage(sender, txt) {
-	// 	var msg = {
-	// 				  "welcome_message" : {
-	// 				    "message_data": {
-	// 				      "text": "Welcome!"
-	// 				    }
-	// 				  }
-	// 				};
-	// 	T.post('direct_messages/welcome_messages/new', msg, sent);
-
-	// 	function sent(err, data, response) {
-	// 		if (err) {
-	// 			console.log('hi...Something went wrong!');
-	// 			console.log(err);
-	// 		} else {
-	// 			console.log('hi...Message was sent!');
-	// 			console.log(response);
-	// 		}
-	// 	}
-	// }
 }
 app.listen(app.get('port'), function() {
 	console.log('Running on port ', app.get('port'));
