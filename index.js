@@ -223,19 +223,18 @@ function TwitterBot() {
 					      },
 					      "message_data": {
 					        "text": "Welcome! I am built by open source community Fossasia. Also, I am evolving continuously.",
-					        "quick_reply": {
-					          "type": "options",
-					          "options": [
-					            {
-					              "label": "View Repository",
-					              "metadata": "external_id_1"
-					            },
-					            {
-					              "label": "Start Chatting",
-					              "metadata": "external_id_2"
-					            }
-					          ]
-					        }
+					        "ctas": [
+					          {
+					            "type": "web_url",
+					            "label": "View Repository",
+					            "url": "https://www.github.com/fossasia/susi_server"
+					          },
+					          {
+					            "type": "web_url",
+					            "label": "Chat on the web client",
+					            "url": "http://chat.susi.ai"
+					          }
+					        ]
 					      }
 					    }
 					  }
