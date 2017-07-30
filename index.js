@@ -124,7 +124,21 @@ function TwitterBot() {
 			makeEvent(senderId);
 		}
 		else if(directMsg.direct_message.text === "Start Chatting"){
-			sendMessage(senderName, "You can ask me anything. Your questions are my food and I am damn hungry!");
+			var queryUrl = 'http://api.susi.ai/susi/chat.json?q=start+chatting';
+			var text = '';
+			request({
+				url: queryUrl,
+				json: true
+			}, function (err, response, data) {
+				if (!err && response.statusCode === 200) {
+					text = data.answers[0].actions[0].expression;
+				} 
+				else {
+					message = 'Oops, Looks like Susi is taking a break, She will be back soon';
+					console.log(err);
+				}
+			});		
+			sendMessage(senderName, text);
 		}
 		else if(directMsg.direct_message.text === "View Repository"){
 			sendMessage(senderName, "Visit https://www.github.com/fossasia/susi_server");
@@ -214,6 +228,20 @@ function TwitterBot() {
 	}
 
 	function makeEvent(sender) {
+		var queryUrl = 'http://api.susi.ai/susi/chat.json?q=get+started';
+		var message = '';
+		request({
+			url: queryUrl,
+			json: true
+		}, function (err, response, data) {
+			if (!err && response.statusCode === 200) {
+				message = data.answers[0].actions[0].expression;
+			} 
+			else {
+				message = 'Oops, Looks like Susi is taking a break, She will be back soon';
+				console.log(err);
+			}
+		});
 		var msg = {
 					  "event": {
 					    "type": "message_create",
@@ -222,7 +250,7 @@ function TwitterBot() {
 					        "recipient_id": sender
 					      },
 					      "message_data": {
-					        "text": "Welcome! I am built by open source community Fossasia. Also, I am evolving continuously.",
+					        "text": message,
 					        "ctas": [
 					          {
 					            "type": "web_url",
