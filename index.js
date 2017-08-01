@@ -52,9 +52,9 @@ function TwitterBot() {
 						if(data.answers[0].actions[0].type === 'table'){
 							var colNames = data.answers[0].actions[0].columns;
 							if((data.answers[0].metadata.count)>50)
-								message += 'Due to message limit, only some universities are shown-:\n\n';
+								message += 'Due to message limit, only some results are shown-:\n\n';
 							else
-								message += 'Universities are shown below-:\n\n';
+								message += 'Results are shown below-:\n\n';
 							for(var i=0;i<(((data.answers[0].metadata.count)>50)?50:data.answers[0].metadata.count);i++){
 								for(var cN in colNames){
 									message += (colNames[cN]+' : ');
@@ -91,18 +91,45 @@ function TwitterBot() {
 		console.log('Follow event !');
 		var name = eventMsg.source.name;
 		var screenName = eventMsg.source.screen_name;
-		var x = Math.floor(Math.random()*1000);
 		var user_id1 = eventMsg.source.id_str;
 		T.post('friendships/create', {user_id : user_id1},  function(err, tweets, response){
 			if (err) {
 				console.log('friendships/create ' + err);
-				tweetIt('@' + screenName + ' Thank you for following me! Your lucky number is ' + x);
-				console.log("----Couldn't follow back!");
-				console.log(response);
+				var queryUrl = 'http://api.susi.ai/susi/chat.json?q=Follow+back+failed';
+				var message = '';
+				request({
+					url: queryUrl,
+					json: true
+				}, function (err, response, data) {
+					if (!err && response.statusCode === 200) {
+						message = data.answers[0].actions[0].expression;
+					} 
+					else {
+						message = 'Oops, Looks like Susi is taking a break, She will be back soon';
+						console.log(err);
+					}
+					tweetIt('@' + screenName + ' ' + message);
+					console.log("----Couldn't follow back!");
+					console.log(response);
+				});
 			} 
 			else {    
-				tweetIt('@' + screenName + ' Thank you for following me! Your lucky number is ' + x + '.I followed you back, you can also direct message me now! ;)');
-				console.log("----followed back!");
+				var queryUrl = 'http://api.susi.ai/susi/chat.json?q=Follow+back+success';
+				var message = '';
+				request({
+					url: queryUrl,
+					json: true
+				}, function (err, response, data) {
+					if (!err && response.statusCode === 200) {
+						message = data.answers[0].actions[0].expression;
+					} 
+					else {
+						message = 'Oops, Looks like Susi is taking a break, She will be back soon';
+						console.log(err);
+					}
+					tweetIt('@' + screenName + ' ' + message);
+					console.log("----followed back!");
+				});
 			} 
 		});	
 	}
@@ -120,28 +147,8 @@ function TwitterBot() {
 		console.log('You receive a message!');
 		console.log(directMsg);
 
-		if(directMsg.direct_message.text === "get started"){
+		if(directMsg.direct_message.text === "Get started"){
 			makeEvent(senderId);
-		}
-		else if(directMsg.direct_message.text === "Start Chatting"){
-			var queryUrl = 'http://api.susi.ai/susi/chat.json?q=start+chatting';
-			var text = '';
-			request({
-				url: queryUrl,
-				json: true
-			}, function (err, response, data) {
-				if (!err && response.statusCode === 200) {
-					text = data.answers[0].actions[0].expression;
-				} 
-				else {
-					message = 'Oops, Looks like Susi is taking a break, She will be back soon';
-					console.log(err);
-				}
-			});		
-			sendMessage(senderName, text);
-		}
-		else if(directMsg.direct_message.text === "View Repository"){
-			sendMessage(senderName, "Visit https://www.github.com/fossasia/susi_server");
 		}
 		else{
 			var queryUrl = 'http://api.susi.ai/susi/chat.json?q=' + encodeURI(directMsg.direct_message.text);
@@ -167,9 +174,9 @@ function TwitterBot() {
 						if(data.answers[0].actions[0].type === 'table'){
 							var colNames = data.answers[0].actions[0].columns;
 							if((data.answers[0].metadata.count)>50)
-								message += 'Due to message limit, only some universities are shown-:\n\n';
+								message += 'Due to message limit, only some results are shown-:\n\n';
 							else
-								message += 'Universities are shown below-:\n\n';
+								message += 'Results are shown below-:\n\n';
 							for(var i=0;i<((data.answers[0].metadata.count)>50?50:data.answers[0].metadata.count);i++){
 								for(var cN in colNames){
 									message += (colNames[cN]+' : ');
@@ -241,43 +248,43 @@ function TwitterBot() {
 				message = 'Oops, Looks like Susi is taking a break, She will be back soon';
 				console.log(err);
 			}
-		});
-		var msg = {
-					  "event": {
-					    "type": "message_create",
-					    "message_create": {
-					      "target": {
-					        "recipient_id": sender
-					      },
-					      "message_data": {
-					        "text": message,
-					        "ctas": [
-					          {
-					            "type": "web_url",
-					            "label": "View Repository",
-					            "url": "https://www.github.com/fossasia/susi_server"
-					          },
-					          {
-					            "type": "web_url",
-					            "label": "Chat on the web client",
-					            "url": "http://chat.susi.ai"
-					          }
-					        ]
-					      }
-					    }
-					  }
-					};
+			var msg = {
+						  "event": {
+						    "type": "message_create",
+						    "message_create": {
+						      "target": {
+						        "recipient_id": sender
+						      },
+						      "message_data": {
+						        "text": message,
+						        "ctas": [
+						          {
+						            "type": "web_url",
+						            "label": "View Repository",
+						            "url": "https://www.github.com/fossasia/susi_server"
+						          },
+						          {
+						            "type": "web_url",
+						            "label": "Chat on the web client",
+						            "url": "http://chat.susi.ai"
+						          }
+						        ]
+						      }
+						    }
+						  }
+						};
 
-		T.post('direct_messages/events/new', msg, sent);
+			T.post('direct_messages/events/new', msg, sent);
 
-		function sent(err, data, response) {
-			if (err) {
-				console.log('Something went wrong!');
-				console.log(err);
-			} else {
-				console.log('Event was sent!');
+			function sent(err, data, response) {
+				if (err) {
+					console.log('Something went wrong!');
+					console.log(err);
+				} else {
+					console.log('Event was sent!');
+				}
 			}
-		}
+		});
 	}
 }
 app.listen(app.get('port'), function() {
