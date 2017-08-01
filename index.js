@@ -90,6 +90,7 @@ function TwitterBot() {
 		console.log('Follow event !');
 		var name = eventMsg.source.name;
 		var screenName = eventMsg.source.screen_name;
+		if(screenName != 'SusiAI1'){
 		var x = Math.floor(Math.random()*1000);
 		var user_id1 = eventMsg.source.id_str;
 		T.post('friendships/create', {user_id : user_id1},  function(err, tweets, response){
@@ -104,6 +105,7 @@ function TwitterBot() {
 				console.log("----followed back!");
 			} 
 		});	
+		}
 	}
 
 	stream.on('direct_message', reply);
