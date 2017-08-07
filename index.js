@@ -283,37 +283,37 @@ function TwitterBot() {
 					console.log(err);
 				}
 				var msg = {
-	                  "event": {
-	                    "type": "message_create",
-	                    "message_create": {
-	                      "target": {
-	                        "recipient_id": sender
-	                      },
-	                      "message_data": {
-	                        "text": txt,
-	                        "ctas": [
-	                          {
-	                            "type": "web_url",
-	                            "label": "Share with your followers",
-	                            "url": "https://twitter.com/intent/tweet?text="+encodeURI("Reply by SUSI.AI - ")+encodeURI(txt)+"%0A"+encodeURI(message)+"%0Ahttps://twitter.com/SusiAI1"
-	                          }
-	                        ]
-	                      }
-	                    }
-	                  }
-	                };
-				T.post('direct_messages/events/new', msg, sent);
+		                  "event": {
+		                    "type": "message_create",
+		                    "message_create": {
+		                      "target": {
+		                        "recipient_id": sender
+		                      },
+		                      "message_data": {
+		                        "text": txt,
+		                        "ctas": [
+		                          {
+		                            "type": "web_url",
+		                            "label": "Share with your followers",
+		                            "url": "https://twitter.com/intent/tweet?text="+encodeURI("Reply by SUSI.AI - ")+encodeURI(txt)+"%0A"+encodeURI(message)+"%0Ahttps://twitter.com/SusiAI1"
+		                          }
+		                        ]
+		                      }
+		                    }
+		                  }
+		                };
+					T.post('direct_messages/events/new', msg, sent);
 
-				function sent(err, data, response) {
-					if (err) {
-						console.log('Something went wrong!');
-						console.log(err);
-					} else {
-						console.log('Event was sent!');
+					function sent(err, data, response) {
+						if (err) {
+							console.log('Something went wrong!');
+							console.log(err);
+						} else {
+							console.log('Event was sent!');
+						}
 					}
-				}
-			});
-			
+				});
+					
 	}	
 }
 app.listen(app.get('port'), function() {
