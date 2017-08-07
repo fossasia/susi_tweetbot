@@ -77,11 +77,11 @@ function TwitterBot() {
 				console.log(message);
 
 				if(message.length > 140){
-					tweetIt('@' + from + ' Sorry due to tweet word limit, I have sent you a personal message. Check inbox'+date);
+					tweetIt('@' + from + ' Sorry due to tweet word limit, I have sent you a personal message. Check inbox'+date+"\nhttps://twitter.com/messages/compose?recipient_id=871446601000202244");
 					sendMessage(from, message);
 				}
 				else{
-					tweetIt('@' + from + ' ' + message + date);
+					tweetIt('@' + from + ' ' + message + date +"\nhttps://twitter.com/messages/compose?recipient_id=871446601000202244");
 				}
 			});
 		}
