@@ -12,7 +12,7 @@ spec:
     spec:
       containers:
       - name: susi-tweetbot
-        image: aliayubkhan/susi_tweetbot:latest
+        image: fossasia/susi_tweetbot:latest-master
         ports:
         - containerPort: 8080
           protocol: TCP

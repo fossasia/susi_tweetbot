@@ -1,8 +1,8 @@
-export DEPLOY_BRANCH=${DEPLOY_BRANCH:-development1}
+export DEPLOY_BRANCH=${DEPLOY_BRANCH:-master}
 
 export REPOSITORY="https://github.com/${TRAVIS_REPO_SLUG}.git"
 
-if [ "$TRAVIS_PULL_REQUEST" != "false" -o "$TRAVIS_REPO_SLUG" != "AliAyub007/susi_tweetbot" -o  "$TRAVIS_BRANCH" != "$DEPLOY_BRANCH" ]; then
+if [ "$TRAVIS_PULL_REQUEST" != "false" -o "$TRAVIS_REPO_SLUG" != "fossasia/susi_tweetbot" -o  "$TRAVIS_BRANCH" != "$DEPLOY_BRANCH" ]; then
     echo "Skip production deployment for a very good reason."
     exit 0
 fi
@@ -21,7 +21,7 @@ gcloud components install kubectl
 
 echo ">>> Decrypting credentials and authenticating gcloud account"
 gcloud config set compute/zone us-central1-b
-openssl aes-256-cbc -K $encrypted_ae9b5dfab596_key -iv $encrypted_ae9b5dfab596_iv -in ./kubernetes/travis/susi-telegrambot-e467bca1e540.json.enc -out susi-telegrambot-e467bca1e540.json -d
+openssl aes-256-cbc -K $encrypted_1ddd026de245_key -iv $encrypted_1ddd026de245_iv -in ./kubernetes/travis/susi-telegrambot-e467bca1e540.json.enc -out susi-telegrambot-e467bca1e540.json -d
 mkdir -p lib
 gcloud auth activate-service-account --key-file susi-telegrambot-e467bca1e540.json
 export GOOGLE_APPLICATION_CREDENTIALS=$(pwd)/susi-telegrambot-e467bca1e540.json
