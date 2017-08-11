@@ -5,9 +5,9 @@ ARG BRANCH
 ARG REPOSITORY
 
 ENV COMMIT_HASH ${COMMIT_HASH:-null}
-ENV BRANCH ${BRANCH:-master}
-ENV REPOSITORY ${REPOSITORY:-https://github.com/fossasia/susi_gitterbot.git}
-ENV INSTALL_PATH /gitter
+ENV BRANCH ${BRANCH:-development1}
+ENV REPOSITORY ${REPOSITORY:-https://github.com/AliAyub007/susi_tweetbot.git}
+ENV INSTALL_PATH /twitter
 
 RUN mkdir -p $INSTALL_PATH
 
@@ -17,6 +17,6 @@ COPY . .
 
 RUN bash setup.sh
 
-WORKDIR $INSTALL_PATH/susi_gitterbot
+WORKDIR $INSTALL_PATH/susi_tweetbot
 
 CMD [ "npm", "start" ]
