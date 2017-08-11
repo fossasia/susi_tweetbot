@@ -1,0 +1,13 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: susi-tweetbot
+  namespace: tweetbot
+spec:
+  ports:
+  - port: 8080
+    protocol: TCP
+    targetPort: 8080
+  selector:
+    app: susi-tweetbot
+  type: LoadBalancer
