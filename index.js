@@ -6,8 +6,7 @@ var request = require('request');
 var http = require('http');
 
 var app = express();
-app.set('port', (process.env.PORT || 5000));
-var heroku_deploy_url = (process.env.HEROKU_URL)||("https://susitweetbot.herokuapp.com");
+app.set('port', (process.env.PORT || 8080));
 
 var T = new Twit({
 	consumer_key: process.env.TWITTER_CK,
@@ -17,9 +16,7 @@ var T = new Twit({
 });
 
 function TwitterBot() {
-	setInterval(function() { http.get(heroku_deploy_url); }, 1800000);
 	var stream = T.stream('user');
-	
 	createWelcomeMessage();
 
 	stream.on('tweet', tweetEvent);
