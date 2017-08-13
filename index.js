@@ -17,6 +17,7 @@ var T = new Twit({
 
 function TwitterBot() {
 	var stream = T.stream('user');
+
 	createWelcomeMessage();
 
 	stream.on('tweet', tweetEvent);
@@ -50,9 +51,9 @@ function TwitterBot() {
 						if(data.answers[0].actions[0].type === 'table'){
 							var colNames = data.answers[0].actions[0].columns;
 							if((data.answers[0].metadata.count)>50)
-								message += 'Due to message limit, only some universities are shown-:\n\n';
+								message += 'Due to message limit, only some results are shown-:\n\n';
 							else
-								message += 'Universities are shown below-:\n\n';
+								message += 'Results are shown below-:\n\n';
 							for(var i=0;i<(((data.answers[0].metadata.count)>50)?50:data.answers[0].metadata.count);i++){
 								for(var cN in colNames){
 									message += (colNames[cN]+' : ');
@@ -89,19 +90,47 @@ function TwitterBot() {
 		console.log('Follow event !');
 		var name = eventMsg.source.name;
 		var screenName = eventMsg.source.screen_name;
+
 		if(screenName != 'SusiAI1'){
-		var x = Math.floor(Math.random()*1000);
 		var user_id1 = eventMsg.source.id_str;
 		T.post('friendships/create', {user_id : user_id1},  function(err, tweets, response){
 			if (err) {
 				console.log('friendships/create ' + err);
-				tweetIt('@' + screenName + ' Thank you for following me! Your lucky number is ' + x);
-				console.log("----Couldn't follow back!");
-				console.log(response);
+				var queryUrl = 'http://api.susi.ai/susi/chat.json?q=Follow+back+failed';
+				var message = '';
+				request({
+					url: queryUrl,
+					json: true
+				}, function (err, response, data) {
+					if (!err && response.statusCode === 200) {
+						message = data.answers[0].actions[0].expression;
+					} 
+					else {
+						message = 'Oops, Looks like Susi is taking a break, She will be back soon';
+						console.log(err);
+					}
+					tweetIt('@' + screenName + ' ' + message);
+					console.log("----Couldn't follow back!");
+					console.log(response);
+				});
 			} 
 			else {    
-				tweetIt('@' + screenName + ' Thank you for following me! Your lucky number is ' + x + '.I followed you back, you can also direct message me now! ;)');
-				console.log("----followed back!");
+				var queryUrl = 'http://api.susi.ai/susi/chat.json?q=Follow+back+success';
+				var message = '';
+				request({
+					url: queryUrl,
+					json: true
+				}, function (err, response, data) {
+					if (!err && response.statusCode === 200) {
+						message = data.answers[0].actions[0].expression;
+					} 
+					else {
+						message = 'Oops, Looks like Susi is taking a break, She will be back soon';
+						console.log(err);
+					}
+					tweetIt('@' + screenName + ' ' + message);
+					console.log("----followed back!");
+				});
 			} 
 		});	
 		}
@@ -110,60 +139,69 @@ function TwitterBot() {
 	stream.on('direct_message', reply);
 	function reply(directMsg) {
 		console.log('You receive a message!');
-		if (directMsg.direct_message.sender_screen_name === 'SusiAI1') {
+
+		var senderName = directMsg.direct_message.sender_screen_name;
+		var senderId = directMsg.direct_message.sender.id_str;
+
+		if (senderName === 'SusiAI1') {
 			return;
 		}
 		console.log('You receive a message!');
 		console.log(directMsg);
-		
-		var queryUrl = 'http://api.susi.ai/susi/chat.json?q=' + encodeURI(directMsg.direct_message.text);
-		var message = '';
-		request({
-			url: queryUrl,
-			json: true
-		}, function (err, response, data) {
-			if (!err && response.statusCode === 200) {
-				if(data.answers[0].actions[1]){
-					if(data.answers[0].actions[1].type === 'rss'){
-						message += 'I found this on the web-:\n\n'
-						for(var i=0;i<((data.answers[0].metadata.count)>50?50:data.answers[0].metadata.count);i++){
-								message += ('Title : ');
-								message += data.answers[0].data[i].title+', ';
-								message += ('Link : ');
-								message += data.answers[0].data[i].link+', ';
-							message += '\n\n';
-						}
-					}
-				}
-				else{
-					if(data.answers[0].actions[0].type === 'table'){
-						var colNames = data.answers[0].actions[0].columns;
-						if((data.answers[0].metadata.count)>50)
-							message += 'Due to message limit, only some universities are shown-:\n\n';
-						else
-							message += 'Universities are shown below-:\n\n';
-						for(var i=0;i<((data.answers[0].metadata.count)>50?50:data.answers[0].metadata.count);i++){
-							for(var cN in colNames){
-								message += (colNames[cN]+' : ');
-								message += data.answers[0].data[i][cN]+', ';
+
+		if(directMsg.direct_message.text === "Get started"){
+			makeEvent(senderId);
+		}
+		else{
+			var queryUrl = 'http://api.susi.ai/susi/chat.json?q=' + encodeURI(directMsg.direct_message.text);
+			var message = '';
+			request({
+				url: queryUrl,
+				json: true
+			}, function (err, response, data) {
+				if (!err && response.statusCode === 200) {
+					if(data.answers[0].actions[1]){
+						if(data.answers[0].actions[1].type === 'rss'){
+							message += 'I found this on the web-:\n\n'
+							for(var i=0;i<((data.answers[0].metadata.count)>50?50:data.answers[0].metadata.count);i++){
+									message += ('Title : ');
+									message += data.answers[0].data[i].title+', ';
+									message += ('Link : ');
+									message += data.answers[0].data[i].link+', ';
+								message += '\n\n';
 							}
-							message += '\n\n';
 						}
 					}
-					else
-					{
-						message = data.answers[0].actions[0].expression;
+					else{
+						if(data.answers[0].actions[0].type === 'table'){
+							var colNames = data.answers[0].actions[0].columns;
+							if((data.answers[0].metadata.count)>50)
+								message += 'Due to message limit, only some results are shown-:\n\n';
+							else
+								message += 'Results are shown below-:\n\n';
+							for(var i=0;i<((data.answers[0].metadata.count)>50?50:data.answers[0].metadata.count);i++){
+								for(var cN in colNames){
+									message += (colNames[cN]+' : ');
+									message += data.answers[0].data[i][cN]+', ';
+								}
+								message += '\n\n';
+							}
+						}
+						else
+						{
+							message = data.answers[0].actions[0].expression;
+						}
 					}
+				} 
+				else {
+					message = 'Oops, Looks like Susi is taking a break, She will be back soon';
+					console.log(err);
 				}
-			} 
-			else {
-				message = 'Oops, Looks like Susi is taking a break, She will be back soon';
-				console.log(err);
-			}
-			sendEvent(directMsg.direct_message.sender.id_str, message);
-			console.log(message);
+			  sendEvent(directMsg.direct_message.sender.id_str, message);
+			  console.log(message);
 		});
 	}
+  }
 
 	function tweetIt(txt) {
 		var tweet = {
@@ -197,48 +235,49 @@ function TwitterBot() {
 			}
 		}
 	}
-
-	function createWelcomeMessage(){
+  
+  function createWelcomeMessage(){
 		var queryUrl = 'http://api.asksusi.com/susi/chat.json?q=Welcome';
-		var message = '';
+    var message = '';
 		request({
 			url: queryUrl,
 			json: true
 		}, function (err, response, data) {
 			if (!err && response.statusCode === 200) {
 				message = data.answers[0].actions[0].expression;
-			}
+      		}
 			else{
 				message = 'Oops, Looks like Susi is taking a break, She will be back soon';
 				console.log(err);
 			}
 			var msg = {
-  					"welcome_message" : {
-					      "message_data": {
-					        "text": message,
-					        "quick_reply": {
-					          "type": "options",
-					          "options": [
-					            {
-					              "label": "Get started",
-					              "metadata": "external_id_1"
-					            },
-					            {
-					              "label": "Start chatting",
-					              "metadata": "external_id_2"
-					            }
-					          ]
-					        }
-					      }
-					    }
-					  };
+                  "welcome_message" : {
+                    "message_data": {
+                      "text": message,
+                      "quick_reply": {
+                        "type": "options",
+                        "options": [
+                          {
+                            "label": "Get started",
+                            "metadata": "external_id_1"
+                          },
+                          {
+                            "label": "Start chatting",
+                            "metadata": "external_id_2"
+                          }
+                        ]
+                      }
+                    }
+                  }
+                };
 			T.post('direct_messages/welcome_messages/new', msg, sent);
-			function sent(err, data, response) {
+      		
+      		function sent(err, data, response) {
 				if (err) {
 					console.log('Something went wrong!');
 					console.log(err);
 				} else {
-					console.log('Message was sent!\n');
+          			console.log('Message was sent!\n');
 					console.log(JSON.stringify(data)+'\n');
 					
 					// Making a welcome message rule
@@ -312,6 +351,58 @@ function TwitterBot() {
 				});
 					
 	}	
+
+	function makeEvent(sender) {
+		var queryUrl = 'http://api.susi.ai/susi/chat.json?q=get+started';
+		var message = '';
+		request({
+			url: queryUrl,
+			json: true
+		}, function (err, response, data) {
+			if (!err && response.statusCode === 200) {
+				message = data.answers[0].actions[0].expression;
+      		}
+			else{
+				message = 'Oops, Looks like Susi is taking a break, She will be back soon';
+				console.log(err);
+			}
+			var msg = {
+                  "event": {
+                    "type": "message_create",
+                    "message_create": {
+                      "target": {
+                        "recipient_id": sender
+                      },
+                      "message_data": {
+                        "text": message,
+                        "ctas": [
+                          {
+                            "type": "web_url",
+                            "label": "View Repository",
+                            "url": "https://www.github.com/fossasia/susi_server"
+                          },
+                          {
+                            "type": "web_url",
+                            "label": "Chat on the web client",
+                            "url": "http://chat.susi.ai"
+                          }
+                        ]
+                      }
+                    }
+                  }
+                };
+			T.post('direct_messages/events/new', msg, sent);
+
+			function sent(err, data, response) {
+				if (err) {
+					console.log('Something went wrong!');
+					console.log(err);
+				} else {
+					console.log('Event was sent!');
+				}
+			}
+		});
+	}
 }
 app.listen(app.get('port'), function() {
 	console.log('Running on port ', app.get('port'));
