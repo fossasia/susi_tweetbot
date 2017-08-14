@@ -149,9 +149,8 @@ function TwitterBot() {
 		console.log('You receive a message!');
 		console.log(directMsg);
 
-		if(directMsg.direct_message.text === "Get started"){
-			makeEvent(senderId);
-		}
+		if(directMsg.direct_message.text === "Get started" || directMsg.direct_message.text === "Start chatting" || directMsg.direct_message.text === "How to contribute?")
+			sendEvent(senderName, senderId, directMsg.direct_message.text, "");
 		else{
 			var queryUrl = 'http://api.susi.ai/susi/chat.json?q=' + encodeURI(directMsg.direct_message.text);
 			var message = '';
@@ -197,7 +196,7 @@ function TwitterBot() {
 					message = 'Oops, Looks like Susi is taking a break, She will be back soon';
 					console.log(err);
 				}
-			  sendEvent(directMsg.direct_message.sender.id_str, message);
+			  sendEvent(senderName, senderId, "Share", message);
 			  console.log(message);
 		});
 	}
@@ -304,8 +303,41 @@ function TwitterBot() {
 		});
 	}
 
-	function sendEvent(sender,txt) {
-			var queryUrl = 'http://api.susi.ai/susi/chat.json?q='+'Share';
+	function sendEvent(senderName, senderId ,query,txt) {
+		if(query === "Share"){
+			var msg = {
+                  "event": {
+                    "type": "message_create",
+                    "message_create": {
+                      "target": {
+                        "recipient_id": senderId
+                      },
+                      "message_data": {
+                        "text": txt,
+                        "ctas": [
+                          {
+                            "type": "web_url",
+                            "label": "Share with your followers",
+                            "url": "https://twitter.com/intent/tweet?text="+encodeURI("Reply by SUSI.AI - ")+encodeURI(txt)+"%0A"+encodeURI(message)+"%0Ahttps://twitter.com/SusiAI1"
+                          }
+                        ]
+                      }
+                    }
+                  }
+                };
+			T.post('direct_messages/events/new', msg, sent);
+
+			function sent(err, data, response) {
+				if (err) {
+					console.log('Something went wrong!');
+					console.log(err);
+				} else {
+					console.log('Event was sent!');
+				}
+			}
+		}
+		if(query === "Start chatting"){
+			var queryUrl = 'http://api.susi.ai/susi/chat.json?q='+encodeURI(query);
 			var message = '';
 			request({
 				url: queryUrl,
@@ -319,41 +351,115 @@ function TwitterBot() {
 					console.log(err);
 				}
 				var msg = {
+					text: message,
+					screen_name: senderName
+				}
+				T.post('direct_messages/new', msg, sent);
+
+				function sent(err, data, response) {
+					if (err) {
+						console.log('Something went wrong!');
+						console.log(err);
+					} else {
+						console.log('Message was sent!');
+					}
+				}
+			});
+		}	
+		if(query === "Get started")
+		{
+			var queryUrl = 'http://api.susi.ai/susi/chat.json?q='+encodeURI(query);
+			var message = '';
+			request({
+				url: queryUrl,
+				json: true
+			}, function (err, response, data) {
+				if (!err && response.statusCode === 200) {
+					message = data.answers[0].actions[0].expression;
+	      		}
+				else{
+					message = 'Oops, Looks like Susi is taking a break, She will be back soon';
+					console.log(err);
+				}
+				var msg = {
+	                  "event": {
+	                    "type": "message_create",
+	                    "message_create": {
+	                      "target": {
+	                        "recipient_id": senderId
+	                      },
+	                      "message_data": {
+	                        "text": message,
+	                        "ctas": [
+	                          {
+	                            "type": "web_url",
+	                            "label": "View Repository",
+	                            "url": "https://www.github.com/fossasia/susi_server"
+	                          },
+	                          {
+	                            "type": "web_url",
+	                            "label": "Chat on the web client",
+	                            "url": "http://chat.susi.ai"
+	                          }
+	                        ]
+	                      }
+	                    }
+	                  }
+	                };
+				T.post('direct_messages/events/new', msg, sent);
+
+				function sent(err, data, response) {
+					if (err) {
+						console.log('Something went wrong!');
+						console.log(err);
+					} 
+					else {
+						console.log('Event was sent!');
+						var msg = {
 		                  "event": {
 		                    "type": "message_create",
 		                    "message_create": {
-		                      "target": {
-		                        "recipient_id": sender
-		                      },
-		                      "message_data": {
-		                        "text": txt,
-		                        "ctas": [
-		                          {
-		                            "type": "web_url",
-		                            "label": "Share with your followers",
-		                            "url": "https://twitter.com/intent/tweet?text="+encodeURI("Reply by SUSI.AI - ")+encodeURI(txt)+"%0A"+encodeURI(message)+"%0Ahttps://twitter.com/SusiAI1"
-		                          }
-		                        ]
-		                      }
-		                    }
-		                  }
-		                };
-					T.post('direct_messages/events/new', msg, sent);
+								"target": {
+									"recipient_id": senderId
+								},
+								"message_data": {
+			                      "text": "Start Contributing:",
+			                      "quick_reply": {
+			                        "type": "options",
+			                        "options": [
+			                          {
+			                            "label": "How to contribute?",
+			                            "metadata": "external_id_3"
+			                          }
+			                        ]
+			                      }
+		                    	}
+	                    	}
+						}
+					};
+					T.post('direct_messages/events/new', msg, sent3);
 
-					function sent(err, data, response) {
+					function sent3(err, data, response) {
 						if (err) {
 							console.log('Something went wrong!');
 							console.log(err);
-						} else {
+						} 
+						else {
 							console.log('Event was sent!');
 						}
 					}
-				});
-					
+				}
+			}
+			});
+		}
+		if(query === "How to contribute?")
+		{
+			sendCTAMessage("Contribution",senderId,"Visit Repository", "https://www.github.com/fossasia/susi_server");
+		}		
 	}	
 
-	function makeEvent(sender) {
-		var queryUrl = 'http://api.susi.ai/susi/chat.json?q=get+started';
+	function sendCTAMessage(query, senderId, label, url){
+		var queryUrl = 'http://api.susi.ai/susi/chat.json?q='+encodeURI(query);
 		var message = '';
 		request({
 			url: queryUrl,
@@ -371,20 +477,15 @@ function TwitterBot() {
                     "type": "message_create",
                     "message_create": {
                       "target": {
-                        "recipient_id": sender
+                        "recipient_id": senderId
                       },
                       "message_data": {
                         "text": message,
                         "ctas": [
                           {
                             "type": "web_url",
-                            "label": "View Repository",
-                            "url": "https://www.github.com/fossasia/susi_server"
-                          },
-                          {
-                            "type": "web_url",
-                            "label": "Chat on the web client",
-                            "url": "http://chat.susi.ai"
+                            "label": label,
+                            "url": url
                           }
                         ]
                       }
@@ -397,13 +498,17 @@ function TwitterBot() {
 				if (err) {
 					console.log('Something went wrong!');
 					console.log(err);
-				} else {
+				} 
+				else {
 					console.log('Event was sent!');
+					if(query !== "Gitter channel")
+						sendCTAMessage("Gitter channel",senderId,"Chat on Gitter", "https://www.gitter.im/fossasia/susi_server");
 				}
 			}
 		});
 	}
 }
+
 app.listen(app.get('port'), function() {
 	console.log('Running on port ', app.get('port'));
 	TwitterBot();
