@@ -361,11 +361,53 @@ function TwitterBot() {
 						console.log('Something went wrong!');
 						console.log(err);
 					} else {
+						var msg = {
+								  "event": {
+								    "type": "message_create",
+								    "message_create": {
+								      "target": {
+								        "recipient_id": senderId
+								      },
+									"message_data": {
+								        "text": "You can try the following:",
+								        "quick_reply": {
+								          "type": "options",
+								          "options": [
+								            {
+								              "label": "What is FOSSASIA?",
+								              "metadata": "external_id_4"
+								            },
+								            {
+								              "label": "Who is Einstein?",
+								              "metadata": "external_id_5"
+								            },
+								            {
+								              "label": "Borders with INDIA",
+								              "metadata": "external_id_6"
+								            }
+								          ]
+								        }
+								      }
+								    }
+								   }
+						};
+						T.post('direct_messages/events/new', msg, sent2);
+
+						function sent2(err, data, response) {
+							if (err) {
+								console.log('Something went wrong!');
+								console.log(err);
+							} else {
+								console.log('Event was sent!');
+							}
+						}
+
 						console.log('Message was sent!');
 					}
 				}
 			});
 		}	
+    
 		if(query === "Get started")
 		{
 			var queryUrl = 'http://api.susi.ai/susi/chat.json?q='+encodeURI(query);
@@ -480,7 +522,7 @@ function TwitterBot() {
                         "recipient_id": senderId
                       },
                       "message_data": {
-                        "text": message,
+                        "text": txt,
                         "ctas": [
                           {
                             "type": "web_url",
@@ -506,7 +548,7 @@ function TwitterBot() {
 				}
 			}
 		});
-	}
+	}	
 }
 
 app.listen(app.get('port'), function() {
