@@ -218,7 +218,7 @@ function TwitterBot() {
 		}
 	}
 
-	function sendMessage(sender, txt) {
+	function sendMessage(senderId, senderName, txt) {
 		var msg = {
 			text: txt,
 			screen_name: sender
@@ -303,38 +303,47 @@ function TwitterBot() {
 		});
 	}
 
+	function sent3(err, data, response) {
+		if (err) {
+			console.log('Something went wrong!');
+			console.log(err);
+		} 
+		else {
+			console.log('Event was sent!');
+		}
+	}
+
 	function sendEvent(senderName, senderId ,query,txt) {
 		if(query === "Share"){
 			var msg = {
-                  "event": {
-                    "type": "message_create",
-                    "message_create": {
-                      "target": {
-                        "recipient_id": senderId
-                      },
-                      "message_data": {
-                        "text": txt,
-                        "ctas": [
-                          {
-                            "type": "web_url",
-                            "label": "Share with your followers",
-                            "url": "https://twitter.com/intent/tweet?text="+encodeURI("Reply by SUSI.AI - ")+encodeURI(txt)+"%0A"+encodeURI(message)+"%0Ahttps://twitter.com/SusiAI1"
-                          }
-                        ]
+              "event": {
+                "type": "message_create",
+                "message_create": {
+                  "target": {
+                    "recipient_id": senderId
+                  },
+                  "message_data": {
+                    "text": txt,
+                    "ctas": [
+                      {
+                        "type": "web_url",
+                        "label": "Share with your followers",
+                        "url": "https://twitter.com/intent/tweet?text="+encodeURI("Reply by SUSI.AI - ")+encodeURI(txt)+"%0A"+encodeURI(message)+"%0Ahttps://twitter.com/SusiAI1"
                       }
-                    }
+                    ],
+			          "quick_reply": {
+			            "type": "text_input",
+			            "text_input": {
+			              "keyboard": "default",
+			              "label": "Type your next query here."
+			            }
+			          }
                   }
-                };
-			T.post('direct_messages/events/new', msg, sent);
+                }
+              }
+            };
 
-			function sent(err, data, response) {
-				if (err) {
-					console.log('Something went wrong!');
-					console.log(err);
-				} else {
-					console.log('Event was sent!');
-				}
-			}
+			T.post('direct_messages/events/new', msg, sent3);
 		}
 		if(query === "Start chatting"){
 			var queryUrl = 'http://api.susi.ai/susi/chat.json?q='+encodeURI(query);
@@ -391,18 +400,7 @@ function TwitterBot() {
 								    }
 								   }
 						};
-						T.post('direct_messages/events/new', msg, sent2);
-
-						function sent2(err, data, response) {
-							if (err) {
-								console.log('Something went wrong!');
-								console.log(err);
-							} else {
-								console.log('Event was sent!');
-							}
-						}
-
-						console.log('Message was sent!');
+						T.post('direct_messages/events/new', msg, sent3);
 					}
 				}
 			});
@@ -481,15 +479,7 @@ function TwitterBot() {
 					};
 					T.post('direct_messages/events/new', msg, sent3);
 
-					function sent3(err, data, response) {
-						if (err) {
-							console.log('Something went wrong!');
-							console.log(err);
-						} 
-						else {
-							console.log('Event was sent!');
-						}
-					}
+					
 				}
 			}
 			});
