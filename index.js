@@ -149,7 +149,7 @@ function TwitterBot() {
 		console.log('You receive a message!');
 		console.log(directMsg);
 
-		if(directMsg.direct_message.text === "Get started" || directMsg.direct_message.text === "Start chatting" || directMsg.direct_message.text === "How to contribute?")
+		if(directMsg.direct_message.text === "Get started" || directMsg.direct_message.text === "Start chatting" || directMsg.direct_message.text === "Contribute to SUSI.AI")
 			sendEvent(senderName, senderId, directMsg.direct_message.text, "");
 		else{
 			var queryUrl = 'http://api.susi.ai/susi/chat.json?q=' + encodeURI(directMsg.direct_message.text);
@@ -218,7 +218,7 @@ function TwitterBot() {
 		}
 	}
 
-	function sendMessage(sender, txt) {
+	function sendMessage(senderId, senderName, txt) {
 		var msg = {
 			text: txt,
 			screen_name: sender
@@ -303,38 +303,40 @@ function TwitterBot() {
 		});
 	}
 
+	function sent3(err, data, response) {
+		if (err) {
+			console.log('Something went wrong!');
+			console.log(err);
+		} 
+		else {
+			console.log('Event was sent!');
+		}
+	}
+
 	function sendEvent(senderName, senderId ,query,txt) {
 		if(query === "Share"){
 			var msg = {
-                  "event": {
-                    "type": "message_create",
-                    "message_create": {
-                      "target": {
-                        "recipient_id": senderId
-                      },
-                      "message_data": {
-                        "text": txt,
-                        "ctas": [
-                          {
-                            "type": "web_url",
-                            "label": "Share with your followers",
-                            "url": "https://twitter.com/intent/tweet?text="+encodeURI("Reply by SUSI.AI - ")+encodeURI(txt)+"%0A"+encodeURI(message)+"%0Ahttps://twitter.com/SusiAI1"
-                          }
-                        ]
+              "event": {
+                "type": "message_create",
+                "message_create": {
+                  "target": {
+                    "recipient_id": senderId
+                  },
+                  "message_data": {
+                    "text": txt,
+                    "ctas": [
+                      {
+                        "type": "web_url",
+                        "label": "Share with your followers",
+                        "url": "https://twitter.com/intent/tweet?text="+encodeURI("Reply by SUSI.AI - ")+encodeURI(txt)+"%0A"+encodeURI(message)+"%0Ahttps://twitter.com/SusiAI1"
                       }
-                    }
+                    ]
                   }
-                };
-			T.post('direct_messages/events/new', msg, sent);
+                }
+              }
+            };
 
-			function sent(err, data, response) {
-				if (err) {
-					console.log('Something went wrong!');
-					console.log(err);
-				} else {
-					console.log('Event was sent!');
-				}
-			}
+			T.post('direct_messages/events/new', msg, sent3);
 		}
 		if(query === "Start chatting"){
 			var queryUrl = 'http://api.susi.ai/susi/chat.json?q='+encodeURI(query);
@@ -391,18 +393,7 @@ function TwitterBot() {
 								    }
 								   }
 						};
-						T.post('direct_messages/events/new', msg, sent2);
-
-						function sent2(err, data, response) {
-							if (err) {
-								console.log('Something went wrong!');
-								console.log(err);
-							} else {
-								console.log('Event was sent!');
-							}
-						}
-
-						console.log('Message was sent!');
+						T.post('direct_messages/events/new', msg, sent3);
 					}
 				}
 			});
@@ -465,12 +456,16 @@ function TwitterBot() {
 									"recipient_id": senderId
 								},
 								"message_data": {
-			                      "text": "Start Contributing:",
+			                      "text": "Please select an option:",
 			                      "quick_reply": {
 			                        "type": "options",
 			                        "options": [
 			                          {
-			                            "label": "How to contribute?",
+			                          	"label": "Start chatting",
+			                            "metadata": "external_id_2"
+			                          },
+			                          {
+			                            "label": "Contribute to SUSI.AI",
 			                            "metadata": "external_id_3"
 			                          }
 			                        ]
@@ -479,22 +474,12 @@ function TwitterBot() {
 	                    	}
 						}
 					};
-					T.post('direct_messages/events/new', msg, sent3);
-
-					function sent3(err, data, response) {
-						if (err) {
-							console.log('Something went wrong!');
-							console.log(err);
-						} 
-						else {
-							console.log('Event was sent!');
-						}
-					}
+					T.post('direct_messages/events/new', msg, sent3);		
 				}
 			}
 			});
 		}
-		if(query === "How to contribute?")
+		if(query === "Contribute to SUSI.AI")
 		{
 			sendCTAMessage("Contribution",senderId,"Visit Repository", "https://www.github.com/fossasia/susi_server");
 		}		
@@ -514,6 +499,41 @@ function TwitterBot() {
 				message = 'Oops, Looks like Susi is taking a break, She will be back soon';
 				console.log(err);
 			}
+			var msgData;
+			if(query !== "Gitter channel")
+			{
+				msgData = {
+	                        "text": message,
+	                        "ctas": [
+	                          {
+	                            "type": "web_url",
+	                            "label": label,
+	                            "url": url
+	                          }
+	                        ]
+	                      };
+	        }
+	        else{
+				msgData = {
+		                        "text": message,
+		                        "ctas": [
+		                          {
+		                            "type": "web_url",
+		                            "label": label,
+		                            "url": url
+		                          }
+		                        ],
+					            "quick_reply": {
+			                        "type": "options",
+			                        "options": [
+			                          {
+			                          	"label": "Start chatting",
+			                            "metadata": "external_id_2"
+			                          }
+			                        ]
+			                      }
+	                        };
+	        }
 			var msg = {
                   "event": {
                     "type": "message_create",
@@ -521,16 +541,7 @@ function TwitterBot() {
                       "target": {
                         "recipient_id": senderId
                       },
-                      "message_data": {
-                        "text": txt,
-                        "ctas": [
-                          {
-                            "type": "web_url",
-                            "label": label,
-                            "url": url
-                          }
-                        ]
-                      }
+                      "message_data": msgData
                     }
                   }
                 };
