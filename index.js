@@ -170,6 +170,11 @@ function TwitterBot() {
 								message += '\n\n';
 							}
 						}
+						else if(data.answers[0].actions[2] && data.answers[0].actions[2].type === 'map'){
+							var mapMessage = data.answers[0].actions[0].expression;
+							var lat = data.answers[0].actions[2].latitude, lon = data.answers[0].actions[2].longitude;
+							sendLocation(senderId,mapMessage,lat,lon);
+						}	
 					}
 					else{
 						if(data.answers[0].actions[0].type === 'table'){
@@ -313,6 +318,37 @@ function TwitterBot() {
 		}
 	}
 
+	function sendLocation(senderId, msg, lat, lon)
+	{
+		var msg2 = {
+			"event": {
+				"type": "message_create",
+				"message_create": {
+					"target": {
+						"recipient_id": senderId
+					},
+					"message_data": {
+						"text": msg,
+						"attachment": {
+							"type": "location",
+							"location": {
+								"type": "shared_coordinate",
+								"shared_coordinate": {
+									"coordinates": {
+										"type": "Point",
+										"coordinates": [lon, lat]
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		};
+		T.post('direct_messages/events/new', msg2, sent3);
+	}
+
+
 	function sendEvent(senderName, senderId ,query,txt) {
 		if(query === "Share"){
 			var msg = {
@@ -384,7 +420,7 @@ function TwitterBot() {
 								              "metadata": "external_id_5"
 								            },
 								            {
-								              "label": "Borders with INDIA",
+								              "label": "Borders with India",
 								              "metadata": "external_id_6"
 								            }
 								          ]
