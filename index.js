@@ -348,7 +348,6 @@ function TwitterBot() {
 		T.post('direct_messages/events/new', msg2, sent3);
 	}
 
-
 	function sendEvent(senderName, senderId ,query,txt) {
 		if(query === "Share"){
 			var msg = {
@@ -366,7 +365,14 @@ function TwitterBot() {
                         "label": "Share with your followers",
                         "url": "https://twitter.com/intent/tweet?text="+encodeURI("Reply by SUSI.AI - ")+encodeURI(txt)+"%0A"+encodeURI(message)+"%0Ahttps://twitter.com/SusiAI1"
                       }
-                    ]
+                    ],
+			          "quick_reply": {
+			            "type": "text_input",
+			            "text_input": {
+			              "keyboard": "default",
+			              "label": "Type your next query here."
+			            }
+			          }
                   }
                 }
               }
@@ -510,7 +516,7 @@ function TwitterBot() {
 	                    	}
 						}
 					};
-					T.post('direct_messages/events/new', msg, sent3);		
+					T.post('direct_messages/events/new', msg, sent3);
 				}
 			}
 			});
