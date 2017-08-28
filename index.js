@@ -149,7 +149,7 @@ function TwitterBot() {
 		console.log('You receive a message!');
 		console.log(directMsg);
 
-		if(directMsg.direct_message.text === "Get started" || directMsg.direct_message.text === "Start chatting" || directMsg.direct_message.text === "How to contribute?")
+		if(directMsg.direct_message.text === "Get started" || directMsg.direct_message.text === "Start chatting" || directMsg.direct_message.text === "Contribute to SUSI.AI")
 			sendEvent(senderName, senderId, directMsg.direct_message.text, "");
 		else{
 			var queryUrl = 'http://api.susi.ai/susi/chat.json?q=' + encodeURI(directMsg.direct_message.text);
@@ -170,6 +170,11 @@ function TwitterBot() {
 								message += '\n\n';
 							}
 						}
+						else if(data.answers[0].actions[2] && data.answers[0].actions[2].type === 'map'){
+							var mapMessage = data.answers[0].actions[0].expression;
+							var lat = data.answers[0].actions[2].latitude, lon = data.answers[0].actions[2].longitude;
+							sendLocation(senderId,mapMessage,lat,lon);
+						}	
 					}
 					else{
 						if(data.answers[0].actions[0].type === 'table'){
@@ -313,6 +318,36 @@ function TwitterBot() {
 		}
 	}
 
+	function sendLocation(senderId, msg, lat, lon)
+	{
+		var msg2 = {
+			"event": {
+				"type": "message_create",
+				"message_create": {
+					"target": {
+						"recipient_id": senderId
+					},
+					"message_data": {
+						"text": msg,
+						"attachment": {
+							"type": "location",
+							"location": {
+								"type": "shared_coordinate",
+								"shared_coordinate": {
+									"coordinates": {
+										"type": "Point",
+										"coordinates": [lon, lat]
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		};
+		T.post('direct_messages/events/new', msg2, sent3);
+	}
+
 	function sendEvent(senderName, senderId ,query,txt) {
 		if(query === "Share"){
 			var msg = {
@@ -391,7 +426,7 @@ function TwitterBot() {
 								              "metadata": "external_id_5"
 								            },
 								            {
-								              "label": "Borders with INDIA",
+								              "label": "Borders with India",
 								              "metadata": "external_id_6"
 								            }
 								          ]
@@ -463,12 +498,16 @@ function TwitterBot() {
 									"recipient_id": senderId
 								},
 								"message_data": {
-			                      "text": "Start Contributing:",
+			                      "text": "Please select an option:",
 			                      "quick_reply": {
 			                        "type": "options",
 			                        "options": [
 			                          {
-			                            "label": "How to contribute?",
+			                          	"label": "Start chatting",
+			                            "metadata": "external_id_2"
+			                          },
+			                          {
+			                            "label": "Contribute to SUSI.AI",
 			                            "metadata": "external_id_3"
 			                          }
 			                        ]
@@ -478,13 +517,11 @@ function TwitterBot() {
 						}
 					};
 					T.post('direct_messages/events/new', msg, sent3);
-
-					
 				}
 			}
 			});
 		}
-		if(query === "How to contribute?")
+		if(query === "Contribute to SUSI.AI")
 		{
 			sendCTAMessage("Contribution",senderId,"Visit Repository", "https://www.github.com/fossasia/susi_server");
 		}		
@@ -504,6 +541,41 @@ function TwitterBot() {
 				message = 'Oops, Looks like Susi is taking a break, She will be back soon';
 				console.log(err);
 			}
+			var msgData;
+			if(query !== "Gitter channel")
+			{
+				msgData = {
+	                        "text": message,
+	                        "ctas": [
+	                          {
+	                            "type": "web_url",
+	                            "label": label,
+	                            "url": url
+	                          }
+	                        ]
+	                      };
+	        }
+	        else{
+				msgData = {
+		                        "text": message,
+		                        "ctas": [
+		                          {
+		                            "type": "web_url",
+		                            "label": label,
+		                            "url": url
+		                          }
+		                        ],
+					            "quick_reply": {
+			                        "type": "options",
+			                        "options": [
+			                          {
+			                          	"label": "Start chatting",
+			                            "metadata": "external_id_2"
+			                          }
+			                        ]
+			                      }
+	                        };
+	        }
 			var msg = {
                   "event": {
                     "type": "message_create",
@@ -511,16 +583,7 @@ function TwitterBot() {
                       "target": {
                         "recipient_id": senderId
                       },
-                      "message_data": {
-                        "text": txt,
-                        "ctas": [
-                          {
-                            "type": "web_url",
-                            "label": label,
-                            "url": url
-                          }
-                        ]
-                      }
+                      "message_data": msgData
                     }
                   }
                 };
