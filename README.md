@@ -7,6 +7,8 @@ Visit your twitter account and tweet to @SusiAI1 with your query and enjoy a twe
 Also, you can enjoy personal chatting with Susi. Follow the SUSI AI account on twitter [here](https://twitter.com/SusiAI1) and have a personal chat with it.
 ![twitter chat](/docs/images/twitterChat.PNG)
 
+[![Deploy to Docker Cloud](https://files.cloud.docker.com/images/deploy-to-dockercloud.svg)](https://cloud.docker.com/stack/deploy/?repo=https://github.com/fossasia/susi_tweetbot) 
+
 # Getting Started : Twitter Susi AI Bot Installation 
 We will make a Susi messenger bot account on Twitter. This account will tweet back when it's name is mentioned in a tweet. Also, 1-on-1 auto chat will be inculcated to our account.
 
