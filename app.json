@@ -1,0 +1,22 @@
+{
+
+  "name": "susi_tweetbot",
+  "scripts": {
+
+  },
+  "env": {
+     "LANG": {
+      "required": true
+    }
+  },
+  "formation": {
+  },
+  "addons": [
+
+  ],
+  "buildpacks": [
+    {
+      "url": "heroku/nodejs"
+    }
+  ]
+}
