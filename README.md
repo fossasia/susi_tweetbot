@@ -1,10 +1,11 @@
-# susi_tweetbot
-[![Build Status](https://travis-ci.org/fossasia/susi_tweetbot.svg?branch=master)](https://travis-ci.org/fossasia/susi_tweetbot)
+# Susi Tweet Bot
+[![Build Status](https://travis-ci.org/fossasia/susi_tweetbot.svg?branch=master)](https://travis-ci.org/fossasia/susi_tweetbot) 
+[![Join the chat at https://gitter.im/fossasia/susi_server](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/fossasia/susi_server)
 
 # How to chat with Susi AI bot on Twitter
 Visit your twitter account and tweet to @SusiAI1 with your query and enjoy a tweet back from the Susi AI bot account!
 
-Also, you can enjoy personal chatting with Susi. Follow the SUSI AI account on twitter [here](https://twitter.com/SusiAI1) and have a personal chat with it.
+Also, you can enjoy personal chatting with Susi. Follow the SUSI AI account on twitter [here](https://twitter.com/SusiAI1) and have a personal chat with it.  
 ![twitter chat](/docs/images/twitterChat.PNG)
 
 # Getting Started : Twitter Susi AI Bot Installation 
